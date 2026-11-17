@@ -1,0 +1,16 @@
+<a class="sr-only skip-link" href="#main">Vai al contenuto</a>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="/" class="brand">
+            <img src="{{ url_for('brand_logo') }}" width="40" height="40" alt="">
+            <span>{{ brand_name }}</span>
+        </a>
+        <nav aria-label="Navigazione principale">
+            <a href="/" {% if request.path == '/' %}aria-current="page"{% endif %}>Link</a>
+            <a href="/captures" {% if request.path == '/captures' %}aria-current="page"{% endif %}>Catture</a>
+            {% if request.path.startswith('/edit/') %}
+            <a href="{{ request.path }}" aria-current="page">Editor</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>

