@@ -12,6 +12,7 @@ import time
 from werkzeug.serving import make_server
 from werkzeug.wrappers import Response
 
+from access_log import AccessRequestHandler, TunnelRequestHandler, configure_access_log
 from server import app, load_db, valid_http_url
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -96,8 +97,14 @@ def main(cloudflare_fallback=False):
         lock = threading.RLock()
         shared = SerializedRequests(app, lock)
         # Both tunnels point to the filtered listener on port 8001.
-        for port, application in ((8000, shared), (8001, PublicLinksOnly(shared))):
-            servers.append(make_server('127.0.0.1', port, application, threaded=True))
+        configure_access_log()
+        listeners = (
+            (8000, shared, AccessRequestHandler),
+            (8001, PublicLinksOnly(shared), TunnelRequestHandler),
+        )
+        for port, application, handler in listeners:
+            servers.append(make_server('127.0.0.1', port, application, threaded=True,
+                                       request_handler=handler))
         for listener in servers:
             thread = threading.Thread(target=listener.serve_forever, daemon=True)
             thread.start()

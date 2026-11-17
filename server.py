@@ -23,6 +23,7 @@ from datetime import datetime, timezone, timedelta
 from urllib.parse import unquote, urlsplit
 
 import requests
+from access_log import REQUEST_ID_KEY, AccessRequestHandler, configure_access_log
 from form_validation import validate_form
 from flask import (Flask, Response, abort, g, jsonify, redirect, render_template,
                    request, send_file)
@@ -34,7 +35,16 @@ DB_PATH = os.path.join(BASE_DIR, "captures.json")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 TZ = timezone(timedelta(hours=1))
 
-app = Flask(__name__)
+class TracerFlask(Flask):
+    def log_exception(self, exc_info):
+        request_id = request.environ.get(REQUEST_ID_KEY)
+        if request_id is None:
+            super().log_exception(exc_info)
+            return
+        self.logger.error("Errore durante la richiesta %s", request_id, exc_info=exc_info)
+
+
+app = TracerFlask(__name__)
 app.jinja_env.globals["brand_name"] = BRAND_NAME
 _db_request_lock = threading.RLock()
 
@@ -689,4 +699,6 @@ if __name__ == "__main__":
     print("  Dati:      {}".format(DB_PATH))
     print("  IP pubblico della rete: {}".format(get_public_ip() or "non rilevato"))
     print("=" * 62)
-    app.run(host=host, port=port, debug=False, threaded=True)
+    configure_access_log()
+    app.run(host=host, port=port, debug=False, threaded=True,
+            request_handler=AccessRequestHandler)

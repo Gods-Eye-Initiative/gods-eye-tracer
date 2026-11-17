@@ -25,7 +25,7 @@
           "name": "telefono",
           "type": "tel",
           "label": "Numero di telefono",
-          "placeholder": "+39 333 0000000",
+          "placeholder": "+xx xxx xxx xxxx",
           "options": "",
           "required": true
         },
@@ -48,7 +48,7 @@
       ],
       "delay_ms": 350,
       "creato": "17/11/2026 00:50:50",
-      "clicks": 5
+      "clicks": 9
     }
   },
   "captures": [],
